@@ -34,7 +34,7 @@ def stitcher_tiles(tiles_list_paths, tiles_folder, stile_file_name):
     out_w, out_h = n_x * tile_w, n_y * tile_h
 
     out_img = Image.new("RGBA", (out_w, out_h), (0, 0, 255, 0))
-    for filepath in tqdm.tqdm(filepaths):
+    for filepath in filepaths:
         x, y = xy(filepath)
         x, y = x - x_0, y - y_0
         tile = Image.open(filepath)

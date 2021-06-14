@@ -9,4 +9,7 @@ RUN pip install owslib
 RUN pip install geojson
 RUN pip install Pillow
 RUN pip install rasterio
+RUN pip install pylint
+RUN pip install fire
+
 WORKDIR /mnt
