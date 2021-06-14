@@ -1,0 +1,12 @@
+fire==0.4.0
+geojson==2.5.0
+joblib==1.0.1
+mercantile==1.2.1
+numpy==1.20.2
+OWSLib==0.24.1
+pylint==2.8.3
+rasterio==1.2.4
+requests==2.25.1
+Shapely==1.7.1
+tqdm==4.61.1
+Pillow==8.2.0

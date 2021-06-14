@@ -1,15 +1,6 @@
 FROM lambgeo/lambda-gdal:3.2-python3.8
-RUN pip install mercantile
-RUN pip install requests
-RUN pip install mercantile
-RUN pip install shapely
-RUN pip install joblib
-RUN pip install tqdm
-RUN pip install owslib
-RUN pip install geojson
-RUN pip install Pillow
-RUN pip install rasterio
-RUN pip install pylint
-RUN pip install fire
+
+COPY requirements.txt .
+RUN pip install --upgrade --ignore-installed --no-cache-dir -r requirements.txt
 
 WORKDIR /mnt
