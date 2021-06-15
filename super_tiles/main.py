@@ -9,12 +9,12 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 from geojson import FeatureCollection as fc
 from shapely.geometry import shape, box, mapping
-import fire
+import click
 from smart_open import open
 
 from super_tiles.utils_transform import generate_buffer, get_tiles_bounds, tile_centroid
 from super_tiles.utils_tiles import download_tiles
-from super_tiles.stitcher import stitcher_tiles
+from super_tiles.utils_img import stitcher_tiles
 
 zoom_distances = {
     "1": 10000000,
@@ -64,11 +64,7 @@ def super_tile(
 
 
 def build_super_tiles(
-    features,
-    tiles_folder,
-    st_tiles_folder,
-    url_map_service,
-    url_map_service_type,
+    features, tiles_folder, st_tiles_folder, url_map_service, url_map_service_type, zoom
 ):
     """Create the supertiles
 
@@ -93,7 +89,7 @@ def build_super_tiles(
             url_map_service_type,
         )
         for feature in tqdm(
-            features, desc="Building super tiles...", total=len(features)
+            features, desc=f"Building super tiles at zoom={zoom}", total=len(features)
         )
     )
 
@@ -126,20 +122,21 @@ def get_tiles_coverage(features, zoom):
 
     new_features = Parallel(n_jobs=-1)(
         delayed(get_tile_coverage)(feature, zoom)
-        for feature in tqdm(features, desc="Setting up tile coverage...")
+        for feature in tqdm(features, desc=f"Setting up tile coverage at zoom={zoom}")
     )
 
     return new_features
 
 
-def main(
-    geojson_file="https://gist.githubusercontent.com/Rub21/da3bb75805d5b3dd61fb41fbb997337b/raw/2a777c025fe7f89a463fa24a33b272a68359fdc9/data.json",
-    zoom=18,
-    url_map_service="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    url_map_service_type="tms",
-    tiles_folder="data/tiles",
-    st_tiles_folder="data/supertiles",
-    geojson_output="data/supertiles.geojson",
+def supertiles(
+    geojson_file,
+    zoom,
+    url_map_service,
+    url_map_service_type,
+    tiles_folder,
+    st_tiles_folder,
+    geojson_output,
+    testing,
 ):
     """Main function to start building the supertiles
 
@@ -172,6 +169,7 @@ def main(
         st_tiles_folder,
         url_map_service,
         url_map_service_type,
+        zoom,
     )
     # save output
     with open(geojson_output, "w") as out_geo:
@@ -180,8 +178,84 @@ def main(
         )
 
     # Return features for testing
-    return features
+    if testing:
+        return features
+
+
+@click.command(short_help="Script to cretae super tiles")
+@click.option(
+    "--geojson_file",
+    help="Geojson file",
+    required=True,
+    type=str,
+)
+@click.option(
+    "--zoom",
+    help="Zoom to get the supertiles",
+    required=True,
+    type=int,
+    default=18,
+)
+@click.option(
+    "--url_map_service",
+    help="Tile map service url",
+    required=True,
+    type=str,
+    default="http://tile.openstreetmap.org/{z}/{x}/{y}.png",
+)
+@click.option(
+    "--url_map_service_type",
+    help="Tile map service url type",
+    required=True,
+    type=str,
+    default="tms",
+)
+@click.option(
+    "--tiles_folder",
+    help="Folder to dowload the tiles",
+    type=str,
+    default="data/tiles",
+)
+@click.option(
+    "--st_tiles_folder",
+    help="Folder to save the super tiles",
+    type=str,
+    default="data/supertiles",
+)
+@click.option(
+    "--geojson_output",
+    help="Geojson file  of the tile coverage",
+    type=str,
+    default="data/supertiles.geojson",
+)
+@click.option(
+    "--testing",
+    help="Value for testing",
+    type=bool,
+    required=False,
+    default=False,
+)
+def main(
+    geojson_file,
+    zoom,
+    url_map_service,
+    url_map_service_type,
+    tiles_folder,
+    st_tiles_folder,
+    geojson_output,
+    testing,
+):
+    supertiles(
+        geojson_file,
+        zoom,
+        url_map_service,
+        url_map_service_type,
+        tiles_folder,
+        st_tiles_folder,
+        geojson_output,
+        testing,
+    )
 
 
 if __name__ == "__main__":
-    fire.Fire(main)
+    main()

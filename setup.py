@@ -18,10 +18,10 @@ dependency_links = [x.strip().replace("git+", "") for x in all_reqs if "git+" no
 setup(
     name="super_tiles",
     author="Rub21",
-    author_email="rub2106@gmail.com",
+    author_email="ruben@developmentseed",
     version=__version__,
     description="Script to generate super tiles",
-    url="https://github.com/Rub21/super_tiles",
+    url="https://github.com/developmentseed/super_tiles",
     keywords="",
     entry_points={
         "console_scripts": [

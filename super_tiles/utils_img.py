@@ -3,6 +3,7 @@ from PIL import Image
 import argparse
 import glob
 import tqdm
+from numpy import asarray
 
 
 def stitcher_tiles(tiles_list_paths, tiles_folder, stile_file_name):
@@ -41,5 +42,6 @@ def stitcher_tiles(tiles_list_paths, tiles_folder, stile_file_name):
         out_img.paste(
             tile, box=(x * tile_w, y * tile_h, (x + 1) * tile_w, (y + 1) * tile_h)
         )
+
     out_img.save(stile_file_name)
     return stile_file_name

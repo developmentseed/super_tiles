@@ -18,7 +18,6 @@ def generate_buffer(geom, distance):
     """Get buffer if geom"""
     centroid = geom.centroid
     x, y = transformer_4326_3857.transform(centroid.x, centroid.y)
-    # print(x,y)
     point = Point(x, y)
     polygon_3857 = point.buffer(distance, cap_style=3)
     points = []
@@ -79,7 +78,6 @@ def get_tiles_bounds(geoBound, zoom):
         tile_bounds = mercantile.bounds(tile[0], tile[1], tile[2])
         poly = box(*tile_bounds)
         polygon_geoms.append(poly)
-        # print(polygon)
         tx.append(tile[0])
         ty.append(tile[1])
         t = f'{"-".join(str(n) for n in tile)}'
