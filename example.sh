@@ -1,6 +1,5 @@
 # !/usr/bin/env bash
 
-
 SUPER_TILES_CONTAINER="docker run -v ${PWD}:/mnt devseed/super-tiles:v1 "
 
 $SUPER_TILES_CONTAINER \
@@ -12,4 +11,3 @@ $SUPER_TILES_CONTAINER \
     --tiles_folder=data/tiles \
     --st_tiles_folder=data/super_tiles \
     --geojson_output=data/schools_supertiles.geojson
-
