@@ -10,3 +10,4 @@ requests==2.25.1
 Shapely==1.7.1
 tqdm==4.61.1
 Pillow==8.2.0
+smart_open[s3]==2.2.0

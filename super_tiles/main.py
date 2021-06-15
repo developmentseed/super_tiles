@@ -1,14 +1,6 @@
 """
 Script for super-tiles creation
 Author: @developmentseed
-Run:
-    python3 super_tiles.py input.geojson \
-    --buffer_distance=100 \
-    --zoom=18 \
-    --tiles_folder=data/tiles_from_UNICEF_training/img_chad \
-    --geojson_outpute=data/validated_data/chad_tile_bounds.geojson \
-    --st_tiles_folder=data/tiles_from_UNICEF_training/img_chad_st
-
 """
 
 import json
@@ -18,33 +10,34 @@ from tqdm import tqdm
 from geojson import FeatureCollection as fc
 from shapely.geometry import shape, box, mapping
 import fire
+from smart_open import open
 
-from utils_transform import generate_buffer, get_tiles_bounds, tile_centroid
-from utils_tiles import download_tiles
-from stitcher import stitcher_tiles
+from super_tiles.utils_transform import generate_buffer, get_tiles_bounds, tile_centroid
+from super_tiles.utils_tiles import download_tiles
+from super_tiles.stitcher import stitcher_tiles
 
 zoom_distances = {
-    "1": 20037508,
-    "2": 10018754,
-    "3": 5009377,
-    "4": 2504689,
-    "5": 1252344,
-    "6": 626172,
-    "7": 313086,
-    "8": 156543,
-    "9": 78272,
-    "10": 39136,
-    "11": 19568,
-    "12": 9784,
-    "13": 4892,
-    "14": 2446,
-    "15": 1223,
-    "16": 611,
-    "17": 306,
+    "1": 10000000,
+    "2": 5000000,
+    "3": 2500000,
+    "4": 1200000,
+    "5": 600000,
+    "6": 300000,
+    "7": 150000,
+    "8": 75000,
+    "9": 42000,
+    "10": 20000,
+    "11": 10000,
+    "12": 5000,
+    "13": 2500,
+    "14": 1250,
+    "15": 700,
+    "16": 400,
+    "17": 200,
     "18": 100,
-    "19": 76,
-    "20": 38,
-    "21": 19,
+    "19": 50,
+    "20": 20,
+    "21": 10,
 }
 
 
@@ -64,6 +57,7 @@ def super_tile(
         # build supertiles
         stile_file_name = f"{st_tiles_folder}/{tiles_list[0]}-st.png"
         stitcher_tiles(tiles_list_paths, tiles_folder, stile_file_name)
+        feature["properties"]["stile"] = stile_file_name
     except Exception as error:
         print(error)
     return feature
@@ -139,7 +133,7 @@ def get_tiles_coverage(features, zoom):
 
 
 def main(
-    geojson_file,
+    geojson_file="https://gist.githubusercontent.com/Rub21/da3bb75805d5b3dd61fb41fbb997337b/raw/2a777c025fe7f89a463fa24a33b272a68359fdc9/data.json",
     zoom=18,
     url_map_service="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     url_map_service_type="tms",
@@ -163,7 +157,7 @@ def main(
     st_tiles_folder = st_tiles_folder.rstrip("/")
 
     with open(geojson_file, encoding="utf8") as gfile:
-        features = json.load(gfile)["features"][0:3]
+        features = json.load(gfile)["features"]
 
     ############################################
     # Calculate super tiles cover
@@ -185,11 +179,9 @@ def main(
             json.dumps(fc(features), ensure_ascii=False).encode("utf8").decode()
         )
 
+    # Return features for testing
+    return features
 
-#   f = open(output_tiles_bounds_file, "w")
-#     f.write(json.dumps(fc(updated_features),
-#                        ensure_ascii=False).encode('utf8').decode())
-#     f.close()
 
 if __name__ == "__main__":
     fire.Fire(main)

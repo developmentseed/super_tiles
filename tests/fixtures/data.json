@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "generator": "overpass-ide",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.",
+  "timestamp": "2021-06-15T13:18:35Z",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "node/633940916",
+        "name": "Museo Andrés A. Cáceres",
+        "tourism": "museum"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.2278182,
+          -13.1657532
+        ]
+      },
+      "id": "node/633940916"
+    }
+  ]
+}
