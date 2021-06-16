@@ -1,6 +1,6 @@
 <h1 align="center">Super tiles</h1>
 
-Script to generate centralized super tiles for trainee data process, The supertiles are 512X512 size, it can be customized top for bigger tiles.
+Script to generate centralized super tiles for training data process, The supertiles are 512X512 size, it can be customized top for bigger tiles.
 
 ### 🏠 [Homepage](https://github.com/developmentseed/super_tiles)
 
