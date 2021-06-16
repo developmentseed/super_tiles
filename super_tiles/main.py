@@ -54,10 +54,14 @@ def super_tile(
         # download tiles
         if url_map_service_type == "tms":
             tiles_list_paths = download_tiles(tiles_list, tiles_folder, url_map_service)
-        # build supertiles
-        stile_file_name = f"{st_tiles_folder}/{tiles_list[0]}-st.png"
-        stitcher_tiles(tiles_list_paths, tiles_folder, stile_file_name)
-        feature["properties"]["stile"] = stile_file_name
+            if "_" in tiles_list_paths:
+                feature["properties"]["stile"] = "no_found"
+            else:
+                # build supertiles
+                stile_file_name = f"{st_tiles_folder}/{tiles_list[0]}-st.png"
+                stitcher_tiles(tiles_list_paths, stile_file_name)
+                feature["properties"]["stile"] = stile_file_name
+
     except Exception as error:
         print(error)
     return feature

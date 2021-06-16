@@ -1,12 +1,15 @@
 import os
 from PIL import Image
-import argparse
-import glob
-import tqdm
-from numpy import asarray
 
 
-def stitcher_tiles(tiles_list_paths, tiles_folder, stile_file_name):
+def stitcher_tiles(tiles_list_paths, stile_file_name):
+    """Merge tiles in one supertile
+
+    Args:
+        tiles_list_paths (list): list of tiles path
+        stile_file_name ([str): supertile path
+
+    """
     filepaths = tiles_list_paths
 
     def xy(filepath):
@@ -15,8 +18,8 @@ def stitcher_tiles(tiles_list_paths, tiles_folder, stile_file_name):
         y = os.path.splitext(y)[0]
         return int(x), int(y)
 
-    def yx(filepath):
-        return xy(filepath)[::-1]
+    # def yx(filepath):
+    #     return xy(filepath)[::-1]
 
     filepaths = sorted(filepaths, key=xy)
 
