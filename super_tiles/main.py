@@ -57,7 +57,7 @@ def super_tile(
         # build supertiles
         stile_file_name = f"{st_tiles_folder}/{tiles_list[0]}-st.png"
         stitcher_tiles(tiles_list_paths, tiles_folder, stile_file_name)
-        feature["properties"]["stile"] = stile_file_name
+        feature["properties"]["stile"] = os.path.basename(stile_file_name)
     except Exception as error:
         print(error)
     return feature
