@@ -120,8 +120,6 @@ def get_tiles_coverage(features, zoom):
         props = feature["properties"]
         props["tiles_list"] = objs_tile["tiles_list"]
         props["tiles_bbox"] = objs_tile["tiles_bbox"]
-        geom_poly = box(*objs_tile["tiles_bbox"])
-        feature["geometry"] = mapping(geom_poly)
         return feature
 
     new_features = Parallel(n_jobs=-1)(
@@ -132,6 +130,21 @@ def get_tiles_coverage(features, zoom):
     return new_features
 
 
+def set_tile_boox(feature):
+    """Set tile bbox for a feature
+
+    Args:
+        feature (dict):
+
+    Returns:
+        [dict]: Feature with geometry updated
+    """
+    props = feature["properties"]
+    geom_poly = box(*props["tiles_bbox"])
+    feature["geometry"] = mapping(geom_poly)
+    return feature
+
+
 def supertiles(
     geojson_file,
     zoom,
@@ -140,6 +153,7 @@ def supertiles(
     tiles_folder,
     st_tiles_folder,
     geojson_output,
+    geojson_output_coverage,
     testing,
 ):
     """Main function to start building the supertiles
@@ -179,6 +193,13 @@ def supertiles(
     with open(geojson_output, "w") as out_geo:
         out_geo.write(
             json.dumps(fc(features), ensure_ascii=False).encode("utf8").decode()
+        )
+
+    # save output of tile coverage
+    features_tiles = [set_tile_boox(feature) for feature in features]
+    with open(geojson_output_coverage, "w") as out_geo:
+        out_geo.write(
+            json.dumps(fc(features_tiles), ensure_ascii=False).encode("utf8").decode()
         )
 
     # Return features for testing
@@ -228,9 +249,15 @@ def supertiles(
 )
 @click.option(
     "--geojson_output",
-    help="Geojson file  of the tile coverage",
+    help="Original geojson with the attributes: stile, tiles_list, tiles_bbox",
     type=str,
     default="data/supertiles.geojson",
+)
+@click.option(
+    "--geojson_output_coverage",
+    help="Geojson file of the tile coverage including stile, tiles_list, tiles_bbox",
+    type=str,
+    required=False,
 )
 @click.option(
     "--testing",
@@ -247,6 +274,7 @@ def main(
     tiles_folder,
     st_tiles_folder,
     geojson_output,
+    geojson_output_coverage,
     testing,
 ):
     supertiles(
@@ -257,6 +285,7 @@ def main(
         tiles_folder,
         st_tiles_folder,
         geojson_output,
+        geojson_output_coverage,
         testing,
     )
 
