@@ -10,4 +10,5 @@ $SUPER_TILES_CONTAINER \
     --url_map_service_type="tms" \
     --tiles_folder=data/tiles \
     --st_tiles_folder=data/super_tiles \
-    --geojson_output=data/schools_supertiles.geojson
+    --geojson_output=data/schools.geojson \
+    --geojson_output_coverage=data/schools_supertiles_coverage.geojson

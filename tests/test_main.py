@@ -18,6 +18,7 @@ class test(unittest.TestCase):
                 "data/tiles",
                 "data/supertiles",
                 "data/supertiles.geojson",
+                "data/supertiles_coverage.geojson",
                 True,
             )
 
