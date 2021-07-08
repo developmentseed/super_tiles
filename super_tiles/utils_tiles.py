@@ -4,6 +4,9 @@ utils to download tiles.
 import os
 import requests
 from joblib import Parallel, delayed
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def fetch_tile(tile, tiles_folder, url_map_service):
@@ -13,12 +16,12 @@ def fetch_tile(tile, tiles_folder, url_map_service):
     os.makedirs(tiles_folder, exist_ok=True)
     tilefilename = f"{tiles_folder}/{tile}.png"
     if not os.path.isfile(tilefilename):
-        r = requests.get(url, timeout=3.05)
+        r = requests.get(url, timeout=2)
         if r.status_code == 200:
             with open(tilefilename, "wb") as f:
                 f.write(r.content)
         else:
-            print(f"No found image... {url}")
+            logger.info(f"No found image... {url}")
             tilefilename = "_"
     return tilefilename
 
