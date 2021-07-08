@@ -10,11 +10,14 @@ from tqdm import tqdm
 from geojson import FeatureCollection as fc
 from shapely.geometry import shape, box, mapping
 import click
+import logging
 from smart_open import open
 
 from super_tiles.utils_transform import generate_buffer, get_tiles_bounds, tile_centroid
 from super_tiles.utils_tiles import download_tiles
 from super_tiles.utils_img import stitcher_tiles
+
+logger = logging.getLogger(__name__)
 
 zoom_distances = {
     "1": 10000000,
@@ -63,7 +66,7 @@ def super_tile(
                 feature["properties"]["stile"] = os.path.basename(stile_file_name)
 
     except Exception as error:
-        print(error)
+        logger.error(error.__str__())
     return feature
 
 
@@ -130,6 +133,29 @@ def get_tiles_coverage(features, zoom):
     return new_features
 
 
+def clip_geometry_supertile(features):
+    """Calculate Difference geometry of feature and supertile box
+
+    Args:
+        features (dict): map features
+    Returns:
+        dict: map features
+    """
+    has_clip = 0
+    for feature in features:
+        prop = feature.get("properties")
+        geom = shape(feature.get("geometry"))
+        geom_stile = shape(mapping(box(*prop["tiles_bbox"])))
+        if not geom_stile.contains(geom):
+            has_clip += 1
+            prop["has_clip"] = True
+            geom_intersection = geom_stile.intersection(geom)
+            feature["geometry"] = mapping(geom_intersection)
+    if has_clip:
+        logger.info(f"{has_clip} clip geometries")
+    return features
+
+
 def set_tile_boox(feature):
     """Set tile bbox for a feature
 
@@ -179,10 +205,14 @@ def supertiles(
     ############################################
     new_features = get_tiles_coverage(features, zoom)
     # ############################################
+    # # Clip geometry- supertiles
+    # ############################################
+    clip_features = clip_geometry_supertile(new_features)
+    # ############################################
     # # Build super tiles
     # ############################################
     features = build_super_tiles(
-        new_features,
+        clip_features,
         tiles_folder,
         st_tiles_folder,
         url_map_service,
