@@ -14,7 +14,7 @@ import logging
 from smart_open import open
 
 from super_tiles.utils_transform import generate_buffer, get_tiles_bounds, tile_centroid
-from super_tiles.utils_tiles import download_tiles
+from super_tiles.utils_tiles import download_tiles, create_folder
 from super_tiles.utils_img import stitcher_tiles
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ def build_super_tiles(
         dict: map features
     """
     # create super tiles in parallel
-    os.makedirs(st_tiles_folder, exist_ok=True)
+    create_folder(st_tiles_folder)
     _features = Parallel(n_jobs=-1)(
         delayed(super_tile)(
             feature,

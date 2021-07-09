@@ -1,6 +1,7 @@
 import os
-from PIL import Image, ImageFile
+from PIL import Image
 import logging
+from smart_open import open
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ def stitcher_tiles(tiles_list_paths, stile_file_name):
 
     Args:
         tiles_list_paths (list): list of tiles path
-        stile_file_name ([str): supertile path
+        stile_file_name (str): supertile path
 
     """
     try:
@@ -31,7 +32,8 @@ def stitcher_tiles(tiles_list_paths, stile_file_name):
             logger.info("No files found")
             raise SystemExit
 
-        tile_w, tile_h = Image.open(filepaths[0]).size
+        with open(filepaths[0], "rb") as image_tile:
+            tile_w, tile_h = Image.open(image_tile).size
 
         xys = list(map(xy, filepaths))
 
@@ -45,12 +47,16 @@ def stitcher_tiles(tiles_list_paths, stile_file_name):
         for filepath in filepaths:
             x, y = xy(filepath)
             x, y = x - x_0, y - y_0
-            tile = Image.open(filepath)
-            out_img.paste(
-                tile, box=(x * tile_w, y * tile_h, (x + 1) * tile_w, (y + 1) * tile_h)
-            )
+            with open(filepath, "rb") as ftile:
+                tile = Image.open(ftile)
+                out_img.paste(
+                    tile,
+                    box=(x * tile_w, y * tile_h, (x + 1) * tile_w, (y + 1) * tile_h),
+                )
 
-        out_img.save(stile_file_name)
+        with open(stile_file_name, "wb") as sfile:
+            out_img.save(sfile)
+
         return stile_file_name
     except Exception as ex:
         logger.error(ex.__str__())
