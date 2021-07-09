@@ -5,6 +5,7 @@ import os
 import requests
 from joblib import Parallel, delayed
 import logging
+from smart_open import open
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ def fetch_tile(tile, tiles_folder, url_map_service):
             with open(tilefilename, "wb") as f:
                 f.write(r.content)
         else:
-            logger.info(f"No found image... {url}")
+            logger.error(f"No found image... {url}")
             tilefilename = "_"
     return tilefilename
 
