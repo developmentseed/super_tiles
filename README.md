@@ -32,10 +32,10 @@ Note: `docker-compose build` will execute the testing when it is building the co
     --zoom=18 \
     --url_map_service="https://tile.openstreetmap.org/{z}/{x}/{y}.png" \
     --url_map_service_type="tms" \
-    --tiles_folder=data/tiles \
-    --st_tiles_folder=data/super_tiles \
-    --geojson_output=data/schools.geojson \
-    --geojson_output_coverage=data/schools_supertiles_coverage.geojson
+    --tiles_folder=s3://data/tiles \
+    --st_tiles_folder=s3://data/super_tiles \
+    --geojson_output=s3://data/schools.geojson \
+    --geojson_output_coverage=s3://data/schools_supertiles_coverage.geojson
 ```
 
 ## Run tests
