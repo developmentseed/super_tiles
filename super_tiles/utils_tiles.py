@@ -14,7 +14,7 @@ def fetch_tile(tile, tiles_folder, url_map_service):
     """Fetch a tiles"""
     x, y, z = tile.split("-")
     url = url_map_service.format(x=x, z=z, y=y)
-    os.makedirs(tiles_folder, exist_ok=True)
+    create_folder(tiles_folder)
     tilefilename = f"{tiles_folder}/{tile}.png"
     if not os.path.isfile(tilefilename):
         r = requests.get(url, timeout=2)
@@ -34,3 +34,9 @@ def download_tiles(tiles_list, tiles_folder, url_map_service):
     )
     tiles_list_paths = [t for t in tiles_list_paths if t is not None]
     return tiles_list_paths
+
+
+def create_folder(tiles_folder):
+    """ Create folder in local in case is needed"""
+    if tiles_folder[:5] not in ["s3://", "gs://"]:
+        os.makedirs(tiles_folder, exist_ok=True)

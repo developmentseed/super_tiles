@@ -28,14 +28,14 @@ Note: `docker-compose build` will execute the testing when it is building the co
 
 ```sh
     super_tiles \
-    --geojson_file=data/schools.geojson \
-    --zoom=18 \
-    --url_map_service="https://tile.openstreetmap.org/{z}/{x}/{y}.png" \
-    --url_map_service_type="tms" \
-    --tiles_folder=s3://data/tiles \
-    --st_tiles_folder=s3://data/super_tiles \
-    --geojson_output=s3://data/schools.geojson \
-    --geojson_output_coverage=s3://data/schools_supertiles_coverage.geojson
+        --geojson_file=s3://ds-data-projects/data_test/schools.geojson \
+        --zoom=18 \
+        --url_map_service="https://tile.openstreetmap.org/{z}/{x}/{y}.png" \
+        --url_map_service_type="tms" \
+        --tiles_folder=s3://ds-data-projects/data_test/tiles \
+        --st_tiles_folder=s3://ds-data-projects/data_test/super_tiles \
+        --geojson_output=s3://ds-data-projects/data_test/schools_training.geojson \
+        --geojson_output_coverage=s3://ds-data-projects/schools_training_coverage.geojson
 ```
 
 ## Run tests
