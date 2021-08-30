@@ -13,6 +13,7 @@ class test(unittest.TestCase):
             features = supertiles(
                 "https://gist.githubusercontent.com/Rub21/7908291b40d527ca7729c671a9e4ae22/raw/3ab630814f2ff1184179a19eab4f4e85e2f281f5/data.json",
                 zoom,
+                1,
                 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 "tms",
                 "data/tiles",
