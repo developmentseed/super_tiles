@@ -1,9 +1,12 @@
-version: '3'
+version: "3"
 services:
-    st:
-        image: devseed/super-tiles:v1
-        build:
-          context: .
-          dockerfile: Dockerfile
-        volumes:
-            - ./:/mnt
+  st:
+    image: devseed/super-tiles:v1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/mnt
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
