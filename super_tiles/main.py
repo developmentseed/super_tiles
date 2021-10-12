@@ -37,16 +37,14 @@ zoom_distances = {
     "15": 700,
     "16": 400,
     "17": 200,
-    "18": 100,
+    "18": 100,  # was 100
     "19": 50,
     "20": 20,
     "21": 10,
 }
 
 
-def super_tile(
-    feature, tiles_folder, st_tiles_folder, url_map_service, url_map_service_type
-):
+def super_tile(feature, tiles_folder, st_tiles_folder, url_map_service, url_map_service_type):
     """Build super tile for map feature
     Returns:
         [dict]: map feature
@@ -103,7 +101,7 @@ def build_super_tiles(
     return _features
 
 
-def get_tiles_coverage(features, zoom):
+def get_tiles_coverage(features, zoom, bounds_multiplier):
     """Get list of tiles thet cover the feature
 
     Args:
@@ -118,7 +116,7 @@ def get_tiles_coverage(features, zoom):
         centroid = geom.centroid
         # Get the centroid of the child  tile
         centroid_fixed = tile_centroid(centroid, zoom + 1)
-        bbox = generate_buffer(centroid_fixed, zoom_distances[str(zoom)])
+        bbox = generate_buffer(centroid_fixed, zoom_distances[str(zoom)] * bounds_multiplier)
         objs_tile = get_tiles_bounds(bbox, zoom)
         props = feature["properties"]
         props["tiles_list"] = objs_tile["tiles_list"]
@@ -174,6 +172,7 @@ def set_tile_boox(feature):
 def supertiles(
     geojson_file,
     zoom,
+    bounds_multiplier,
     url_map_service,
     url_map_service_type,
     tiles_folder,
@@ -203,7 +202,7 @@ def supertiles(
     ############################################
     # Calculate super tiles cover
     ############################################
-    new_features = get_tiles_coverage(features, zoom)
+    new_features = get_tiles_coverage(features, zoom, bounds_multiplier)
     # ############################################
     # # Clip geometry- supertiles
     # ############################################
@@ -221,16 +220,12 @@ def supertiles(
     )
     # save output
     with open(geojson_output, "w") as out_geo:
-        out_geo.write(
-            json.dumps(fc(features), ensure_ascii=False).encode("utf8").decode()
-        )
+        out_geo.write(json.dumps(fc(features), ensure_ascii=False).encode("utf8").decode())
 
     # save output of tile coverage
     features_tiles = [set_tile_boox(feature) for feature in features]
     with open(geojson_output_coverage, "w") as out_geo:
-        out_geo.write(
-            json.dumps(fc(features_tiles), ensure_ascii=False).encode("utf8").decode()
-        )
+        out_geo.write(json.dumps(fc(features_tiles), ensure_ascii=False).encode("utf8").decode())
 
     # Return features for testing
     if testing:
@@ -250,6 +245,13 @@ def supertiles(
     required=True,
     type=int,
     default=18,
+)
+@click.option(
+    "--bounds_multiplier",
+    help="By default, the bounds_multiplier is 1, meaning that a 512x512 tile will be produced for a given zoom. A multiplier of 2 will produce zoom tiles that are twice as high and wide.",
+    required=False,
+    type=int,
+    default=1,
 )
 @click.option(
     "--url_map_service",
@@ -299,6 +301,7 @@ def supertiles(
 def main(
     geojson_file,
     zoom,
+    bounds_multiplier,
     url_map_service,
     url_map_service_type,
     tiles_folder,
@@ -310,6 +313,7 @@ def main(
     supertiles(
         geojson_file,
         zoom,
+        bounds_multiplier,
         url_map_service,
         url_map_service_type,
         tiles_folder,
