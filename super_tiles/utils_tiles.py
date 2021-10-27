@@ -17,7 +17,7 @@ def fetch_tile(tile, tiles_folder, url_map_service):
     create_folder(tiles_folder)
     tilefilename = f"{tiles_folder}/{tile}.png"
     if not os.path.isfile(tilefilename):
-        r = requests.get(url, timeout=2)
+        r = requests.get(url, timeout=15)
         if r.status_code == 200:
             with open(tilefilename, "wb") as f:
                 f.write(r.content)
