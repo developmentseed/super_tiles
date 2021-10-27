@@ -13,12 +13,12 @@ mkdir -p $FOLDER
 ######## Create supertiles for the boundary
 ################################################################
 $GEOKIT_NODE geokit bbox2fc --bbox=$SCENE_ID_BBOX > data/output.geojson
-$GEOKIT_NODE geokit tilecover data/output.geojson --zoom=9 >data/tiles.geojson
+$GEOKIT_NODE geokit tilecover data/output.geojson --zoom=6 >data/tiles.geojson
 
 $SUPER_TILES \
     super_tiles \
     --geojson_file=data/tiles.geojson\
-    --zoom=14 \
+    --zoom=11 \
     --bounds_multiplier=30 \
     --url_map_service="https://nfwqxd6ia0.execute-api.eu-central-1.amazonaws.com/scenes/sentinel1/$SCENE_ID/tiles/WebMercatorQuad/{z}/{x}/{y}.png?expression=log(vv)&rescale=0,10" \
     --url_map_service_type="tms" \
