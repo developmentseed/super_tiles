@@ -12,7 +12,7 @@ from shapely.geometry import shape, box, mapping
 import click
 import logging
 from smart_open import open
-
+import requests
 from super_tiles.utils_transform import generate_buffer, get_tiles_bounds, tile_centroid
 from super_tiles.utils_tiles import download_tiles, create_folder
 from super_tiles.utils_img import stitcher_tiles
@@ -56,7 +56,9 @@ def super_tile(
         tiles_list = feature["properties"]["tiles_list"]
         # download tiles
         if url_map_service_type == "tms":
-            tiles_list_paths = download_tiles(tiles_list, tiles_folder, url_map_service)
+            tiles_list_paths = download_tiles(
+                tiles_list, tiles_folder, url_map_service, requests.Session()
+            )
             has_no_download = any(
                 [not tile_path["has_download"] for tile_path in tiles_list_paths]
             )
