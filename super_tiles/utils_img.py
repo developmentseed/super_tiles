@@ -1,7 +1,9 @@
 import os
-from PIL import Image
+from PIL import Image, ImageFile
 import logging
 from smart_open import open
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 logger = logging.getLogger(__name__)
 
