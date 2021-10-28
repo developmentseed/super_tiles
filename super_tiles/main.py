@@ -55,13 +55,13 @@ def super_tile(feature, tiles_folder, st_tiles_folder, url_map_service, url_map_
         # download tiles
         if url_map_service_type == "tms":
             tiles_list_paths = download_tiles(tiles_list, tiles_folder, url_map_service)
-            if "_" in tiles_list_paths:
-                feature["properties"]["stile"] = "no_found"
-            else:
+            #if "_" in tiles_list_paths:
+            #    feature["properties"]["stile"] = "no_found"
+            #else:
                 # build supertiles
-                stile_file_name = f"{st_tiles_folder}/{tiles_list[0]}-st.png"
-                stitcher_tiles(tiles_list_paths, stile_file_name)
-                feature["properties"]["stile"] = os.path.basename(stile_file_name)
+            stile_file_name = f"{st_tiles_folder}/{tiles_list[0]}-st.png"
+            stitcher_tiles(tiles_list_paths, stile_file_name)
+            feature["properties"]["stile"] = os.path.basename(stile_file_name)
 
     except Exception as error:
         logger.error(error.__str__())

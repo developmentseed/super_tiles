@@ -15,7 +15,7 @@ def stitcher_tiles(tiles_list_paths, stile_file_name):
 
     """
     try:
-        filepaths = tiles_list_paths
+        filepaths = [filep for filep in tiles_list_paths if filep != "_"]
 
         def xy(filepath):
             base = os.path.basename(filepath)
