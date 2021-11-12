@@ -62,6 +62,8 @@ def super_tile(
             has_no_download = any(
                 [not tile_path["has_download"] for tile_path in tiles_list_paths]
             )
+            feature["properties"]["has_tile_no_download"] = has_no_download
+
             if has_no_download and not force:
                 feature["properties"]["stile"] = "no_found"
             else:
@@ -195,6 +197,7 @@ def supertiles(
     st_tiles_folder,
     geojson_output,
     geojson_output_coverage,
+    geojson_error_output,
     force,
     testing,
 ):
@@ -236,6 +239,21 @@ def supertiles(
         zoom,
         force,
     )
+    # ############################################
+    # # filter super tiles with tile no download
+    features_tile_no_download = [
+        feature
+        for feature in features
+        if feature.get("properties", {}).get("has_tile_no_download", False)
+    ]
+
+    with open(geojson_error_output, "w") as out_geo:
+        out_geo.write(
+            json.dumps(fc(features_tile_no_download), ensure_ascii=False)
+            .encode("utf8")
+            .decode()
+        )
+    # ############################################
     # save output
     with open(geojson_output, "w") as out_geo:
         out_geo.write(
@@ -294,6 +312,7 @@ def supertiles(
     help="Folder to dowload the tiles",
     type=str,
     default="data/tiles",
+    required=True,
 )
 @click.option(
     "--st_tiles_folder",
@@ -311,7 +330,13 @@ def supertiles(
     "--geojson_output_coverage",
     help="Geojson file of the tile coverage including stile, tiles_list, tiles_bbox",
     type=str,
-    required=False,
+    required=True,
+)
+@click.option(
+    "--geojson_error_output",
+    help="Geojson file with missing tiles",
+    type=str,
+    required=True,
 )
 @click.option(
     "--force",
@@ -336,6 +361,7 @@ def main(
     st_tiles_folder,
     geojson_output,
     geojson_output_coverage,
+    geojson_error_output,
     force,
     testing,
 ):
@@ -349,6 +375,7 @@ def main(
         st_tiles_folder,
         geojson_output,
         geojson_output_coverage,
+        geojson_error_output,
         force,
         testing,
     )
