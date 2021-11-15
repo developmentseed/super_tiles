@@ -246,7 +246,7 @@ def supertiles(
         for feature in features
         if feature.get("properties", {}).get("has_tile_no_download", False)
     ]
-
+    create_folder(geojson_error_output)
     with open(geojson_error_output, "w") as out_geo:
         out_geo.write(
             json.dumps(fc(features_tile_no_download), ensure_ascii=False)
@@ -336,7 +336,8 @@ def supertiles(
     "--geojson_error_output",
     help="Geojson file with missing tiles",
     type=str,
-    required=True,
+    required=False,
+    default="data/supertiles_errors.geojson",
 )
 @click.option(
     "--force",
