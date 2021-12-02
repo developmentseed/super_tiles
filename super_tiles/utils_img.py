@@ -1,7 +1,9 @@
 import os
-from PIL import Image
+from PIL import Image, ImageFile
 import logging
 from smart_open import open
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +17,17 @@ def stitcher_tiles(tiles_list_paths, stile_file_name):
 
     """
     try:
-        filepaths = tiles_list_paths
+        filepaths = list([tile_path.get("tile_path") for tile_path in tiles_list_paths])
+        filepaths_download = list(
+            [
+                tile_path.get("tile_path")
+                for tile_path in tiles_list_paths
+                if tile_path.get("has_download")
+            ]
+        )
 
-        def xy(filepath):
-            base = os.path.basename(filepath)
+        def xy(filepath_):
+            base = os.path.basename(filepath_)
             x, y, z = base.split("-")
             y = os.path.splitext(y)[0]
             return int(x), int(y)
@@ -28,11 +37,10 @@ def stitcher_tiles(tiles_list_paths, stile_file_name):
 
         filepaths = sorted(filepaths, key=xy)
 
-        if len(filepaths) == 0:
-            logger.info("No files found")
-            raise SystemExit
+        if len(filepaths_download) == 0:
+            raise FileNotFoundError("No tiles found")
 
-        with open(filepaths[0], "rb") as image_tile:
+        with open(filepaths_download[0], "rb") as image_tile:
             tile_w, tile_h = Image.open(image_tile).size
 
         xys = list(map(xy, filepaths))
@@ -47,12 +55,18 @@ def stitcher_tiles(tiles_list_paths, stile_file_name):
         for filepath in filepaths:
             x, y = xy(filepath)
             x, y = x - x_0, y - y_0
-            with open(filepath, "rb") as ftile:
-                tile = Image.open(ftile)
-                out_img.paste(
-                    tile,
-                    box=(x * tile_w, y * tile_h, (x + 1) * tile_w, (y + 1) * tile_h),
-                )
+            if filepath in filepaths_download:
+                with open(filepath, "rb") as ftile:
+                    tile = Image.open(ftile)
+                    out_img.paste(
+                        tile,
+                        box=(
+                            x * tile_w,
+                            y * tile_h,
+                            (x + 1) * tile_w,
+                            (y + 1) * tile_h,
+                        ),
+                    )
 
         with open(stile_file_name, "wb") as sfile:
             out_img.save(sfile)
@@ -60,4 +74,3 @@ def stitcher_tiles(tiles_list_paths, stile_file_name):
         return stile_file_name
     except Exception as ex:
         logger.error(ex.__str__())
-        pass

@@ -12,7 +12,7 @@ from shapely.geometry import shape, box, mapping
 import click
 import logging
 from smart_open import open
-
+import requests
 from super_tiles.utils_transform import generate_buffer, get_tiles_bounds, tile_centroid
 from super_tiles.utils_tiles import download_tiles, create_folder
 from super_tiles.utils_img import stitcher_tiles
@@ -44,7 +44,9 @@ zoom_distances = {
 }
 
 
-def super_tile(feature, tiles_folder, st_tiles_folder, url_map_service, url_map_service_type):
+def super_tile(
+    feature, tiles_folder, st_tiles_folder, url_map_service, url_map_service_type, force
+):
     """Build super tile for map feature
     Returns:
         [dict]: map feature
@@ -54,8 +56,15 @@ def super_tile(feature, tiles_folder, st_tiles_folder, url_map_service, url_map_
         tiles_list = feature["properties"]["tiles_list"]
         # download tiles
         if url_map_service_type == "tms":
-            tiles_list_paths = download_tiles(tiles_list, tiles_folder, url_map_service)
-            if "_" in tiles_list_paths:
+            tiles_list_paths = download_tiles(
+                tiles_list, tiles_folder, url_map_service, requests.Session()
+            )
+            has_no_download = any(
+                [not tile_path["has_download"] for tile_path in tiles_list_paths]
+            )
+            feature["properties"]["has_tile_no_download"] = has_no_download
+
+            if has_no_download and not force:
                 feature["properties"]["stile"] = "no_found"
             else:
                 # build supertiles
@@ -69,7 +78,13 @@ def super_tile(feature, tiles_folder, st_tiles_folder, url_map_service, url_map_
 
 
 def build_super_tiles(
-    features, tiles_folder, st_tiles_folder, url_map_service, url_map_service_type, zoom
+    features,
+    tiles_folder,
+    st_tiles_folder,
+    url_map_service,
+    url_map_service_type,
+    zoom,
+    force,
 ):
     """Create the supertiles
 
@@ -92,6 +107,7 @@ def build_super_tiles(
             st_tiles_folder,
             url_map_service,
             url_map_service_type,
+            force,
         )
         for feature in tqdm(
             features, desc=f"Building super tiles at zoom={zoom}", total=len(features)
@@ -116,7 +132,9 @@ def get_tiles_coverage(features, zoom, bounds_multiplier):
         centroid = geom.centroid
         # Get the centroid of the child  tile
         centroid_fixed = tile_centroid(centroid, zoom + 1)
-        bbox = generate_buffer(centroid_fixed, zoom_distances[str(zoom)] * bounds_multiplier)
+        bbox = generate_buffer(
+            centroid_fixed, zoom_distances[str(zoom)] * bounds_multiplier
+        )
         objs_tile = get_tiles_bounds(bbox, zoom)
         props = feature["properties"]
         props["tiles_list"] = objs_tile["tiles_list"]
@@ -179,6 +197,8 @@ def supertiles(
     st_tiles_folder,
     geojson_output,
     geojson_output_coverage,
+    geojson_error_output,
+    force,
     testing,
 ):
     """Main function to start building the supertiles
@@ -217,15 +237,35 @@ def supertiles(
         url_map_service,
         url_map_service_type,
         zoom,
+        force,
     )
+    # ############################################
+    # # filter super tiles with tile no download
+    features_tile_no_download = [
+        feature
+        for feature in features
+        if feature.get("properties", {}).get("has_tile_no_download", False)
+    ]
+    create_folder(geojson_error_output)
+    with open(geojson_error_output, "w") as out_geo:
+        out_geo.write(
+            json.dumps(fc(features_tile_no_download), ensure_ascii=False)
+            .encode("utf8")
+            .decode()
+        )
+    # ############################################
     # save output
     with open(geojson_output, "w") as out_geo:
-        out_geo.write(json.dumps(fc(features), ensure_ascii=False).encode("utf8").decode())
+        out_geo.write(
+            json.dumps(fc(features), ensure_ascii=False).encode("utf8").decode()
+        )
 
     # save output of tile coverage
     features_tiles = [set_tile_boox(feature) for feature in features]
     with open(geojson_output_coverage, "w") as out_geo:
-        out_geo.write(json.dumps(fc(features_tiles), ensure_ascii=False).encode("utf8").decode())
+        out_geo.write(
+            json.dumps(fc(features_tiles), ensure_ascii=False).encode("utf8").decode()
+        )
 
     # Return features for testing
     if testing:
@@ -272,6 +312,7 @@ def supertiles(
     help="Folder to dowload the tiles",
     type=str,
     default="data/tiles",
+    required=True,
 )
 @click.option(
     "--st_tiles_folder",
@@ -289,7 +330,20 @@ def supertiles(
     "--geojson_output_coverage",
     help="Geojson file of the tile coverage including stile, tiles_list, tiles_bbox",
     type=str,
+    required=True,
+)
+@click.option(
+    "--geojson_error_output",
+    help="Geojson file with missing tiles",
+    type=str,
     required=False,
+    default="data/supertiles_errors.geojson",
+)
+@click.option(
+    "--force",
+    help="flag for force generation supertiles",
+    is_flag=True,
+    default=False,
 )
 @click.option(
     "--testing",
@@ -308,6 +362,8 @@ def main(
     st_tiles_folder,
     geojson_output,
     geojson_output_coverage,
+    geojson_error_output,
+    force,
     testing,
 ):
     supertiles(
@@ -320,6 +376,8 @@ def main(
         st_tiles_folder,
         geojson_output,
         geojson_output_coverage,
+        geojson_error_output,
+        force,
         testing,
     )
 
